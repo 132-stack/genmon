@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GenAI Quest</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#120d26;--panel:#1d1640;--edge:#f6e7b4;--ink:#fff6dc;--gold:#ffcf4a;--pink:#ff5d8f;--teal:#3de0c2;--blue:#5aa9ff;--dim:#a99ed6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:'Press Start 2P',ui-monospace,Menlo,monospace;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;font-size:11px;line-height:1.8}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges}
+#g{position:fixed;inset:0;width:100%;height:100%}
+#vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,#120d2699 100%),repeating-linear-gradient(0deg,#0000 0 3px,#0000000d 3px 4px)}
+.box{background:var(--panel);border:4px solid var(--edge);box-shadow:0 0 0 4px #000,6px 6px 0 4px #0007;padding:14px 16px}
+.pill{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));z-index:5;font-size:9px;padding:8px 10px;background:var(--panel);border:3px solid var(--edge);box-shadow:0 0 0 3px #000}
+#zone{left:10px;color:var(--teal)}#side{right:10px;display:flex;gap:10px;align-items:center}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{background:var(--gold);color:#2a1a00;border:3px solid #000;box-shadow:0 4px 0 #a9761a;padding:8px 10px;font-size:9px}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #a9761a}
+#toast{position:fixed;top:30%;left:50%;transform:translate(-50%,-20px);opacity:0;z-index:6;pointer-events:none;font-size:13px;text-align:center;color:var(--gold);text-shadow:3px 3px 0 #000;transition:.5s;white-space:nowrap}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#dlg{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:720px;margin:auto;z-index:7;min-height:92px;cursor:pointer}
+body.touch #dlg{bottom:calc(190px + env(safe-area-inset-bottom,0px))}
+#who{position:absolute;top:-18px;left:14px;background:var(--pink);color:#fff;padding:5px 9px;border:3px solid #000;font-size:9px}
+#txt{font-size:11px;line-height:2}#nx{position:absolute;right:12px;bottom:6px;color:var(--gold);animation:bl .8s steps(2) infinite}
+@keyframes bl{50%{opacity:0}}
+#pad{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:none;justify-content:space-between;align-items:flex-end;padding:0 18px;z-index:6;pointer-events:none}
+body.touch #pad{display:flex}
+#dp{display:grid;grid-template:repeat(3,56px)/repeat(3,56px);gap:4px;pointer-events:auto}
+#dp button,#ab{background:#2b2160;border:3px solid var(--edge);box-shadow:0 4px 0 #000;font-size:16px;touch-action:none}
+#dp button:active,#ab:active,#dp .on{background:var(--gold);color:#000}
+#ab{pointer-events:auto;width:82px;height:82px;border-radius:50%;background:var(--pink);font-size:22px;margin-bottom:14px}
+#tip{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);font-size:9px;color:var(--dim);z-index:4;white-space:nowrap;text-shadow:2px 2px 0 #000;transition:opacity 1s}
+.ov{position:fixed;inset:0;z-index:9;display:none}
+#bat{background:linear-gradient(#2a1b5e,#6b3d9c 45%,#ff8f6b 62%,#3a8a4a 62%,#2c6b3a);flex-direction:column;justify-content:space-between;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px));z-index:12}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.stat{min-width:150px;font-size:9px;padding:10px}
+.bar{height:10px;background:#000;border:2px solid #000;margin-top:6px}.bar i{display:block;height:100%;background:var(--teal);transition:width .4s}
+#hearts{font-size:14px;letter-spacing:3px;margin-top:6px}
+#bat canvas{width:min(34vw,170px);height:auto}
+#enemy.hit{animation:sh .35s}@keyframes sh{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+#qa{max-width:720px;width:100%;margin:0 auto}#q{font-size:11px;line-height:1.9;margin-bottom:10px}
+.opt{display:block;width:100%;text-align:left;background:#2b2160;border:3px solid var(--edge);padding:9px 10px;margin-top:7px;font-size:10px;line-height:1.6}
+.opt:hover{background:#3b2f80}.opt.ok{background:#1f8f5f}.opt.no{background:#a8324f}
+#fb{margin-top:10px;font-size:10px;line-height:1.8;color:var(--gold)}
+#map,#end,#title{background:#120d26f2;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:16px;text-align:center}
+#mm{width:min(92vw,560px);border:4px solid var(--edge);box-shadow:0 0 0 4px #000}
+#ql{font-size:9px;line-height:2.2;text-align:left;max-width:560px;width:92vw}#ql b{color:var(--gold)}
+#title{z-index:20;background:radial-gradient(circle at 50% 30%,#3b2a85,#120d26 70%)}
+#title h1{font-size:clamp(22px,7vw,46px);line-height:1.3;margin:0;color:var(--gold);text-shadow:4px 4px 0 var(--pink),8px 8px 0 #000}
+#title p{max-width:520px;color:var(--dim);font-size:10px;line-height:2}
+#end{z-index:25}#end h2{color:var(--gold);font-size:18px;margin:0}#cl{font-size:9px;line-height:2.1;max-width:600px;text-align:left}
+#cl div{margin:6px 0;padding:8px;background:var(--panel);border-left:6px solid var(--teal)}
+@media (prefers-reduced-motion:reduce){#nx{animation:none}}
+</style></head><body>
+<canvas id="g"></canvas><div id="vig"></div>
+<div class="pill" id="zone">PROMPT VILLAGE</div>
+<div class="pill" id="side"><span id="prog">BADGES 0/5</span><button class="btn" id="mapb">MAP</button></div>
+<div id="toast"></div><div id="tip"></div>
+<div class="box" id="dlg" hidden><div id="who"></div><div id="txt"></div><span id="nx">▼</span></div>
+<div id="pad"><div id="dp"><span></span><button data-d="up">▲</button><span></span><button data-d="left">◀</button><span></span><button data-d="right">▶</button><span></span><button data-d="down">▼</button><span></span></div><button id="ab">A</button></div>
+<div class="ov" id="bat">
+ <div class="row"><div class="box stat"><div id="en">BUG</div><div class="bar"><i id="eh"></i></div></div><canvas id="enemy" width="64" height="64"></canvas></div>
+ <div class="row" style="align-items:flex-end"><canvas id="me" width="64" height="64"></canvas><div class="box stat"><div>YOU</div><div id="hearts"></div></div></div>
+ <div class="box" id="qa"><div id="q"></div><div id="opts"></div><div id="fb"></div></div>
+</div>
+<div class="ov" id="map"><div class="btn" id="mclose">CLOSE ✕</div><canvas id="mm" width="320" height="240"></canvas><div id="ql"></div></div>
+<div class="ov" id="end"><h2>YOU'RE A GEN AI PRO!</h2><div id="cl"></div><button class="btn" onclick="location.reload()">PLAY AGAIN</button></div>
+<div class="ov" id="title" style="display:flex"><h1>GENMON<br>QUEST</h1><p>Explore the realm, meet five experts and beat the glitchy bugs by answering their questions. Earn a badge for every generative AI career.</p><button class="btn" id="start" style="font-size:12px;padding:12px 16px">PRESS START</button><p id="ctl"></p></div>
+<script>
+const $=id=>document.getElementById(id),T=16,W=40,H=30;
+let seed=11;const rnd=()=>(seed=seed*16807%2147483647)/2147483647;
+const M=Array.from({length:H},()=>Array(W).fill(0));
+const inR=(x,y,a,b,c,d)=>x>=a&&x<=c&&y>=b&&y<=d;
+for(let y=0;y<H;y++)for(let x=0;x<W;x++){const r=rnd();let t=0;
+ if(inR(x,y,0,0,15,14))t=r<.15?1:0;else t=r<.04?1:r>.94?6:0;
+ if(inR(x,y,22,0,39,11))t=(y<=3||rnd()<.24)?5:0;
+ if(x==0||y==0||x==W-1||y==H-1)t=1;
+ if(((x-20)/5.5)**2+((y-15)/3.8)**2<1)t=2;M[y][x]=t}
+const hp=(a,b,y)=>{for(let x=a;x<=b;x++)M[y][x]=M[y][x]==2?8:3},vp=(a,b,x)=>{for(let y=a;y<=b;y++)M[y][x]=M[y][x]==2?8:3};
+hp(3,37,23);vp(8,23,9);vp(11,23,18);vp(7,23,30);hp(3,9,24);
+function house(hx,hy){for(let y=hy-1;y<=hy+3;y++)for(let x=hx-1;x<=hx+3;x++)if(M[y]&&M[y][x]!=3)M[y][x]=0;
+ for(let i=0;i<3;i++){M[hy][hx+i]=4;M[hy+1][hx+i]=i==1?9:7}M[hy+2][hx+1]=3}
+const Q=[
+{n:'Pip',role:'Prompt Engineer',zone:'Prompt Village',x:5,y:22,hx:4,hy:20,c:['#ff9f1c','#3d8bff'],m:['Vague Prompt','#ff6b6b'],
+ intro:['Welcome, rookie! I design prompts that steer large language models.','A Vague Prompt monster is loose in the village. Answer my questions to beat it!'],
+ qs:[['Which technique puts worked examples inside the prompt?',['Quantization','Few-shot prompting','Gradient clipping'],1,'Few-shot prompts show the model examples so it copies the pattern.'],
+ ['How do you fix fuzzy, rambling answers?',['Add context, a role and an output format','Write in ALL CAPS','Make the prompt shorter every time'],0,'Specific context and a clear format give the model something to aim at.']],
+ card:'Prompt Engineer: writes prompts, system instructions and evals. Skills: clear writing, testing, domain knowledge.'},
+{n:'Dara',role:'Data Engineer',zone:'Data Forest',x:9,y:7,hx:8,hy:5,c:['#2ec4b6','#7b4bd6'],m:['Dirty Dataset','#c9a227'],
+ intro:['Hi! I keep the training data flowing through the Data Forest.','Messy data has become a monster. Help me clean it up!'],
+ qs:[['Why deduplicate and clean training data?',['It makes the files prettier','It cuts noise, bias and memorised repeats','It makes the model bigger'],1,'Clean, unique data gives better models and less memorisation.'],
+ ['What is a held-out evaluation set for?',['Testing on data the model never trained on','Training faster','Storing prompts'],0,'Unseen data shows how well the model really generalises.']],
+ card:'Data Engineer / Curator: builds pipelines and datasets for training, RAG and evaluation. Skills: Python, SQL, data quality.'},
+{n:'Max',role:'ML Research Engineer',zone:'Model Mountain',x:30,y:7,hx:29,hy:5,c:['#e63946','#f1faee'],m:['Overfit Golem','#9aa0b5'],
+ intro:['You climbed Model Mountain! I train and improve foundation models.','The Overfit Golem blocks the pass. Show it what you know!'],
+ qs:[['What does attention let a transformer do?',['Weigh which tokens matter for each other','Compress images','Delete old data'],0,'Attention scores how relevant every token is to every other token.'],
+ ['What does lowering temperature do?',['Makes outputs more random','Makes outputs more focused and predictable','Adds more parameters'],1,'Low temperature favours the most likely tokens.']],
+ card:'ML Research Engineer: trains, fine-tunes and evaluates models. Skills: deep learning, PyTorch, maths, experiments.'},
+{n:'Ada',role:'AI Safety & Ethics Lead',zone:'Ethics Lake',x:18,y:10,hx:17,hy:8,c:['#b983ff','#ffd6e8'],m:['Hallucination','#6fd3ff'],
+ intro:['Welcome to Ethics Lake. I make sure AI is safe, fair and honest.','A Hallucination is rippling across the water. Can you calm it?'],
+ qs:[['What is an LLM hallucination?',['A confident answer that is wrong or made up','A slow response','A GPU crash'],0,'Models can state false things fluently, so verify important claims.'],
+ ['What is red teaming?',['Painting model logos','Deliberately attacking a model to find failures','Speeding up training'],1,'Red teams probe for harmful or broken behaviour before attackers do.']],
+ card:'AI Safety / Policy Specialist: red-teams models and shapes responsible-AI rules. Skills: risk analysis, ethics, evals, policy.'},
+{n:'Ollie',role:'AI Engineer (MLOps)',zone:'Deploy City',x:31,y:23,hx:30,hy:21,c:['#ff7b00','#00b4d8'],m:['Latency Beast','#ff8fab'],
+ intro:['Welcome to Deploy City! I ship AI features to real users.','The Latency Beast is crashing our servers. Time to answer!'],
+ qs:[['What does RAG stand for?',['Random Access Generator','Retrieval-Augmented Generation','Rapid Agent Gateway'],1,'RAG fetches relevant documents and feeds them to the model as context.'],
+ ['Why monitor models in production?',['To catch drift, errors, cost and abuse','To make the logo brighter','Models never change'],0,'Real traffic reveals failures, rising costs and quality drift.']],
+ card:'AI Engineer / MLOps: builds apps, RAG and agents, and runs them reliably. Skills: APIs, cloud, monitoring, evals.'}];
+Q.forEach(q=>{house(q.hx,q.hy);q.done=0});
+house(26,24);house(35,21);house(3,26);
+Q.forEach(q=>M[q.y][q.x]=3);
+const ZN=[['Data Forest',0,0,15,14],['Model Mountain',22,0,39,11],['Ethics Lake',14,8,26,20],['Deploy City',24,17,39,29],['Prompt Village',0,15,23,29]];
+// ---- art
+const mk=f=>{const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');f((o,a,b,w,h)=>{x.fillStyle=o;x.fillRect(a,b,w,h)});return c};
+const gr=(r,v)=>{r('#62c05a',0,0,16,16);r('#4fa84c',2+v*4,3,2,1);r('#4fa84c',9-v*2,10,2,1);r('#79d36d',12-v*3,5,1,1);r('#79d36d',4+v,12,1,1)};
+const wt=(r,f)=>{r('#2f6fd1',0,0,16,16);r('#6fb0ff',2+f*6,4,4,1);r('#6fb0ff',9-f*5,10,4,1);r('#1f4fa0',5,13,3,1)};
+const TL={g:[0,1,2].map(v=>mk(r=>gr(r,v))),w:[0,1].map(f=>mk(r=>wt(r,f))),
+1:mk(r=>{gr(r,1);r('#6b3f1e',7,11,3,5);r('#16502a',3,3,10,9);r('#1f6b36',4,1,8,9);r('#4cae5a',5,2,3,3);r('#16502a',3,10,10,1)}),
+3:mk(r=>{r('#dcbc7c',0,0,16,16);r('#c29c5c',3,4,2,2);r('#c29c5c',10,9,3,2);r('#ecd5a2',7,2,2,1)}),
+4:mk(r=>{r('#c0453a',0,0,16,16);for(let i=0;i<4;i++){r('#e0685a',0,i*4,16,1);r('#8e2c22',0,i*4+3,16,1)}}),
+5:mk(r=>{gr(r,0);r('#5d6275',1,6,14,10);for(let i=0;i<7;i++)r('#8b91a6',7-i,3+i,2+i*2,1);r('#f3f6ff',6,1,4,2);r('#f3f6ff',5,3,6,1);r('#454a5c',3,13,10,3)}),
+6:mk(r=>{gr(r,0);r('#ff5d8f',3,4,2,2);r('#ffcf4a',10,9,2,2);r('#fff',5,12,2,2)}),
+7:mk(r=>{r('#efe2c0',0,0,16,16);r('#d8c79c',0,14,16,2);r('#2b4a7a',4,3,8,8);r('#7ec8ff',5,4,6,6);r('#2b4a7a',7,4,2,6)}),
+8:mk(r=>{wt(r,0);r('#9a6a3a',0,0,16,16);for(let i=0;i<4;i++)r('#6f4a24',0,i*4+3,16,1)}),
+9:mk(r=>{r('#efe2c0',0,0,16,16);r('#6b3f1e',4,2,8,14);r('#8a5a2b',5,3,6,13);r('#ffcf4a',9,9,1,1)})};
+const SOL={1:1,2:1,4:1,5:1,7:1};
+const spr=(c,p,pal,x,y,s)=>p.forEach((row,j)=>{for(let i=0;i<8;i++){const k=pal[row[i]];if(k){c.fillStyle=k;c.fillRect(x+i*s,y+j*s,s,s)}}});
+const PF=['..hhhh..','.hhhhhh.','.hsksks.','.ssssss.','..cccc..','.sccccs.','..pppp..','..p..p..'],PB=['..hhhh..','.hhhhhh.','.hhhhhh.','.ssssss.','..cccc..','.sccccs.','..pppp..','..p..p..'];
+const MP=['.kkkkkk.','kmmmmmmk','kmwkwkmk','kmmmmmmk','kmkkkkmk','kmmmmmmk','.kmkkmk.','..k..k..'];
+const PP={h:'#3b2314',s:'#ffcf9e',k:'#000',c:'#e63946',p:'#2b3a8c'};
+function drawMon(i){const c=$('enemy').getContext('2d');c.clearRect(0,0,64,64);spr(c,MP,{k:'#000',m:Q[i].m[1],w:'#fff'},0,0,8)}
+function drawMe(){const c=$('me').getContext('2d');c.clearRect(0,0,64,64);spr(c,PB,PP,0,0,8)}
+// ---- state
+const g=$('g'),ctx=g.getContext('2d');let S=3,vw=0,vh=0;
+const P={x:8,y:24,tx:8,ty:24,p:0,mv:0,d:0},cam={x:0,y:0};let st='title',held={},zn='',now=0,touch=false;
+function rs(){const d=devicePixelRatio||1;vw=innerWidth;vh=innerHeight;g.width=vw*d;g.height=vh*d;S=Math.max(2,Math.round(Math.min(vw,vh)/(T*(touch?7:8))))*d;ctx.imageSmoothingEnabled=false}
+addEventListener('resize',rs);
+function setTouch(t){touch=t;document.body.classList.toggle('touch',t);const s=t?'Use the D-pad to walk and A to talk. Tap MAP for quests.':'Move: arrows or WASD | Talk: E or Space | Map: M';$('ctl').textContent=s;$('tip').textContent=s}
+setTouch(matchMedia('(pointer:coarse)').matches||(navigator.maxTouchPoints>0&&innerWidth<900));rs();
+addEventListener('touchstart',()=>{if(!touch){setTouch(true);rs()}},{passive:true,once:true});
+const solid=(x,y)=>x<0||y<0||x>=W||y>=H||SOL[M[y][x]]||Q.some(q=>q.x==x&&q.y==y);
+function go(dx,dy){if(P.mv)return;P.d=dx?(dx>0?1:3):(dy>0?0:2);if(solid(P.x+dx,P.y+dy))return;P.tx=P.x+dx;P.ty=P.y+dy;P.mv=1;P.p=0}
+function zoneCheck(){const z=(ZN.find(a=>inR(P.x,P.y,a[1],a[2],a[3],a[4]))||ZN[4])[0];if(z!=zn){zn=z;$('zone').textContent=z.toUpperCase();toast(z)}}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1800)}
+// ---- dialog
+let dl=[],di=0,dcb=null;
+function say(who,lines,cb){st='dlg';dl=lines;di=0;dcb=cb;$('who').textContent=who;$('txt').textContent=dl[0];$('dlg').hidden=false}
+function adv(){di++;if(di>=dl.length){$('dlg').hidden=true;st='play';dcb&&dcb()}else $('txt').textContent=dl[di]}
+$('dlg').onclick=adv;
+function interact(){const q=Q.findIndex(q=>Math.abs(q.x-P.x)+Math.abs(q.y-P.y)==1);if(q<0)return;const n=Q[q];
+ if(n.done)say(n.n,['Thanks again, hero! The '+n.role+' path is yours now.']);
+ else say(n.n+' · '+n.role,n.intro,()=>battle(q))}
+// ---- battle
+let bq=0,bh=3,mh=2,qi=0,lock=0,nextF=null;
+function battle(i){st='bat';bq=i;bh=3;mh=Q[i].qs.length;qi=0;$('bat').style.display='flex';$('en').textContent=Q[i].m[0].toUpperCase();drawMon(i);drawMe();bars();ask()}
+function bars(){$('eh').style.width=mh/Q[bq].qs.length*100+'%';$('hearts').textContent='♥'.repeat(bh)+'♡'.repeat(3-bh)}
+function ask(){const q=Q[bq].qs[qi];lock=0;nextF=null;$('q').textContent=q[0];$('fb').textContent='';$('opts').innerHTML='';
+ q[1].forEach((t,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=(i+1)+'. '+t;b.onclick=()=>pick(i);$('opts').appendChild(b)})}
+function pick(i){if(lock)return;lock=1;const q=Q[bq].qs[qi],ok=i==q[2],bs=$('opts').children;bs[i].classList.add(ok?'ok':'no');bs[q[2]].classList.add('ok');
+ if(ok){mh--;qi++;$('enemy').classList.remove('hit');void $('enemy').offsetWidth;$('enemy').classList.add('hit')}else bh--;bars();
+ $('fb').textContent=(ok?'Critical hit! ':'Ouch! ')+q[3]+'  [A / tap to continue]';
+ nextF=()=>{if(mh<=0)win();else if(bh<=0)lose();else{if(ok)ask();else ask()}};setTimeout(()=>{$('qa').onclick=()=>nextF&&nextF()},50)}
+function endBat(){$('bat').style.display='none';st='play';$('qa').onclick=null}
+function win(){endBat();const n=Q[bq];n.done=1;upd();say(n.n,['Brilliant! The '+n.m[0]+' is defeated.','BADGE EARNED: '+n.role+'!',n.card],()=>{if(Q.every(q=>q.done))finale()})}
+function lose(){endBat();say(Q[bq].n,['The '+Q[bq].m[0]+' got you this time. Rest up and try again!'])}
+function upd(){$('prog').textContent='BADGES '+Q.filter(q=>q.done).length+'/5'}
+function finale(){st='end';$('cl').innerHTML=Q.map(q=>'<div><b style="color:#ffcf4a">'+q.role+'</b><br>'+q.card.split(': ')[1]+'</div>').join('');$('end').style.display='flex'}
+// ---- map
+const MC=['#62c05a','#2f7d3a','#3b82d6','#dcbc7c','#c0453a','#8b91a6','#62c05a','#efe2c0','#9a6a3a','#6b3f1e'];let mi=0;
+function drawMap(){const c=$('mm').getContext('2d'),s=8;for(let y=0;y<H;y++)for(let x=0;x<W;x++){c.fillStyle=MC[M[y][x]];c.fillRect(x*s,y*s,s,s)}
+ c.font='8px "Press Start 2P",monospace';c.textAlign='center';
+ Q.forEach((q,i)=>{const x=q.hx*s+12,y=q.hy*s;c.fillStyle='#000';c.fillRect(x-9,y-17,18,18);c.fillStyle=q.done?'#3de0c2':'#ffcf4a';c.fillRect(x-7,y-15,14,14);c.fillStyle='#000';c.fillText(q.done?'✓':'!',x,y-5);
+  c.fillStyle='#fff';c.strokeStyle='#000';c.lineWidth=3;c.strokeText(q.zone.toUpperCase(),x,y+34);c.fillText(q.zone.toUpperCase(),x,y+34)});
+ if(mi%2){c.fillStyle='#000';c.fillRect(P.x*s-2,P.y*s-2,12,12);c.fillStyle='#ff5d8f';c.fillRect(P.x*s,P.y*s,8,8)}}
+function mapT(o){if(o){if(st!='play')return;st='map';$('map').style.display='flex';$('ql').innerHTML=Q.map(q=>(q.done?'✓ ':'<b>!</b> ')+q.zone+': '+q.n+', '+q.role).join('<br>');drawMap();mapT.i=setInterval(()=>{mi++;drawMap()},400)}
+ else if(st=='map'){clearInterval(mapT.i);$('map').style.display='none';st='play'}}
+$('mapb').onclick=()=>mapT(1);$('mclose').onclick=()=>mapT(0);
+// ---- input
+const act=()=>{if(st=='dlg')adv();else if(st=='play')interact();else if(st=='bat'&&lock&&nextF)nextF()};
+const KM={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};
+addEventListener('keydown',e=>{const k=e.key.length>1?e.key:e.key.toLowerCase();
+ if(st=='title'&&(k=='Enter'||k==' '))return begin();
+ if(KM[k]){held[KM[k]]=1;e.preventDefault()}
+ else if(k=='e'||k==' '||k=='Enter'){act();e.preventDefault()}
+ else if(k=='m')mapT(st!='map');else if(k=='Escape')mapT(0);
+ else if(st=='bat'&&'123'.includes(k))pick(+k-1)});
+addEventListener('keyup',e=>{const k=e.key.length>1?e.key:e.key.toLowerCase();delete held[KM[k]]});
+document.querySelectorAll('#dp button').forEach(b=>{const d=b.dataset.d;b.onpointerdown=e=>{held[d]=1;b.classList.add('on');b.setPointerCapture(e.pointerId)};
+ const up=()=>{delete held[d];b.classList.remove('on')};b.onpointerup=up;b.onpointercancel=up;b.onlostpointercapture=up});
+$('ab').onpointerdown=act;$('start').onclick=begin;
+function begin(){$('title').style.display='none';st='play';zoneCheck();say('GUIDE',['Welcome to GenAI Quest! Five experts are waiting with quests marked ! on your map.','Visit each one, beat their bug and collect all 5 career badges.'])}
+setTimeout(()=>$('tip').style.opacity=0,12000);
+// ---- loop
+let last=0;
+function loop(t){const dt=Math.min(50,t-last);last=t;now=t;
+ if(st=='play'){if(P.mv){P.p+=dt/140;if(P.p>=1){P.x=P.tx;P.y=P.ty;P.mv=0;zoneCheck()}}
+  if(!P.mv&&st=='play'){const d=held.up?[0,-1]:held.down?[0,1]:held.left?[-1,0]:held.right?[1,0]:null;if(d)go(d[0],d[1])}}
+ draw();requestAnimationFrame(loop)}
+function draw(){const rx=P.x+(P.tx-P.x)*(P.mv?P.p:0),ry=P.y+(P.ty-P.y)*(P.mv?P.p:0),cw=vw*(devicePixelRatio||1)/S,ch=vh*(devicePixelRatio||1)/S;
+ let cx=Math.max(0,Math.min(W*T-cw,rx*T+8-cw/2)),cy=Math.max(0,Math.min(H*T-ch,ry*T+8-ch/2));
+ if(cw>=W*T)cx=(W*T-cw)/2;if(ch>=H*T)cy=(H*T-ch)/2;cam.x+=(cx-cam.x)*.25;cam.y+=(cy-cam.y)*.25;
+ const ox=Math.round(cam.x*S),oy=Math.round(cam.y*S);ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#120d26';ctx.fillRect(0,0,g.width,g.height);
+ ctx.setTransform(S,0,0,S,-ox,-oy);const f=Math.floor(now/500)%2;
+ const x0=Math.max(0,Math.floor(cam.x/T)),x1=Math.min(W-1,Math.ceil((cam.x+cw)/T)),y0=Math.max(0,Math.floor(cam.y/T)),y1=Math.min(H-1,Math.ceil((cam.y+ch)/T));
+ for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const t=M[y][x];ctx.drawImage(t==0?TL.g[(x*7+y*3)%3]:t==2?TL.w[f]:TL[t],x*T,y*T)}
+ const bob=Math.sin(now/180)*1.5;
+ Q.forEach(q=>{const px=q.x*T,py=q.y*T;ctx.fillStyle='#0004';ctx.fillRect(px+3,py+13,10,3);spr(ctx,PF,{h:q.c[0],s:'#f1c27d',k:'#000',c:q.c[1],p:'#333'},px,py,2);
+  ctx.font='8px "Press Start 2P",monospace';ctx.textAlign='center';ctx.fillStyle=q.done?'#3de0c2':'#ffcf4a';ctx.strokeStyle='#000';ctx.lineWidth=2;const m=q.done?'✓':'!';ctx.strokeText(m,px+8,py-3+bob);ctx.fillText(m,px+8,py-3+bob)});
+ const px=Math.round(rx*T),py=Math.round(ry*T),wb=P.mv?(Math.floor(P.p*4)%2):0;ctx.fillStyle='#0004';ctx.fillRect(px+3,py+13,10,3);
+ ctx.save();if(P.d==3){ctx.translate(px+16,py);ctx.scale(-1,1);spr(ctx,PF,PP,0,-wb,2)}else spr(ctx,P.d==2?PB:PF,PP,px,py-wb,2);ctx.restore()}
+requestAnimationFrame(loop);
+</script></body></html>
